@@ -36,7 +36,7 @@ void Gamestate::init() {
 
 	//Shuffle deck of cards.
 	Deck cards;
-								//cards.shuffle();
+	cards.shuffle();
 
 	//Find out how many cards should be in each hand + remainders.
 	int amountOfPlayers = _humans + _robots;
@@ -53,6 +53,8 @@ void Gamestate::init() {
 		std::vector<Card> robotHand = _createHands(cardsInEachHand, remainders, cards);
 		_players[k]->setHand(robotHand);
 	}
+
+	_wins = 0;
 	_startGame();
 }
 
@@ -116,19 +118,27 @@ void Gamestate::_turn(Card lastCard, Player * player, int index, int passes) {
 	Human * humanp = dynamic_cast<Human*>(player);
 	Card emptyCard;
 	Card card;
-
+	
 	//Game is over, find the last person with cards in their hand and give them SUPER_SLAVE.
 	//Keep going through _turn until you find the player.
 	if (_wins == _players.size() - 1 && player->getHand().size() > 0) {
-		player->setRole(Roles::SUPER_SLAVE);
+		_wins++;
+		Roles role = _findRoleForWinner();
+		player->setRole(role);
+
+		gameOver(_players);
+		if (askToContinue()) {
+			init();
+		}
+		return;
 	}
 
 	//Player has already gotten rid of their hand for this game. Auto pass.
 	if (player->getHand().size() == 0) {
-		playerWonAlready();
+		playerWonAlready(player->name(), index);
 		passes++;
 		index = _incrementOrGoBackToZero(index);
-		_turn(lastCard, player, index, passes);
+		_turn(lastCard, _players[index], index, passes);
 		return;
 	}
 	if (humanp != NULL) {
@@ -145,9 +155,9 @@ void Gamestate::_turn(Card lastCard, Player * player, int index, int passes) {
 	//After Player either passes or chooses card, check if hand is 0.
 	//If hand is 0, give him a role and increase win.
 	if (player->getHand().size() == 0) {
+		_wins++;
 		Roles role = _findRoleForWinner();
 		player->setRole(role);
-		_wins++;
 	}
 
 	//If card isn't an empty card, Player chose a card to use. So use it and reset passes.
@@ -165,7 +175,7 @@ void Gamestate::_turn(Card lastCard, Player * player, int index, int passes) {
 	index = _incrementOrGoBackToZero(index);
 
 	//Everyone but original player passed, so make card the weakest and reset passes for the next turn.
-	if (passes == _humans + _robots - 1) {
+	if (passes >= _humans + _robots - 1) {
 		playerWonTurnSet(player->name(), index, lastCard);
 		lastCard = Card(3, 1, false);
 		passes = 0;
@@ -177,6 +187,7 @@ void Gamestate::_turn(Card lastCard, Player * player, int index, int passes) {
 
 int Gamestate::_incrementOrGoBackToZero(int index) {
 	int i = index + 1;
+
 	if (i >= _players.size()) {
 		i = 0;
 	}
@@ -190,14 +201,17 @@ Roles Gamestate::_findRoleForWinner() {
 	if (size < MIN_FOR_ROLES) {
 		return Roles::NEUTRAL;
 	}
-	else if (_wins == 0) {
+	else if (_wins == 1) {
 		return Roles::KING;
 	}
-	else if (_wins == 1) {
+	else if (_wins == 2) {
 		return Roles::QUEEN;
 	}
 	else if (_wins == size - 1) {
 		return Roles::SLAVE;
+	}
+	else if (_wins == size) {
+		return Roles::SUPER_SLAVE;
 	}
 	else {
 		return Roles::NEUTRAL;

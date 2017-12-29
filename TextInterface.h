@@ -2,6 +2,7 @@
 #define TEXT_INTERFACE_HEADER
 
 #include <iostream>
+#include <vector>
 #include "Player.h"
 #include "Card.h"
 
@@ -18,5 +19,8 @@ void playerWonTurnSet(std::string playerType, int index, Card lastCard);
 void displayNoPossibleCards();
 void playerWonAlready(std::string playerType, int index);
 int passOrGo();
+void gameOver(std::vector<Player*> _players);
+
+bool askToContinue();
 
 #endif

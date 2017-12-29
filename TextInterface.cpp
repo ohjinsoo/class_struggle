@@ -51,3 +51,49 @@ void displayNoPossibleCards() {
 int passOrGo() {
 	return 0;
 }
+
+void gameOver(vector<Player*> _players) {
+	string king = "";
+	string queen = "";
+	vector<string> neutrals;
+	string slave = "";
+	string superSlave = "";
+
+	for (int i = 0; i < _players.size(); i++) {
+		int index = i + 1;
+		if (_players[i]->getRole() == Roles::KING) {
+			king = _players[i]->name() + " #" + to_string(index);
+		}
+		else if (_players[i]->getRole() == Roles::QUEEN) {
+			queen = _players[i]->name() + " #" + to_string(index);
+		}
+		else if (_players[i]->getRole() == Roles::NEUTRAL) {
+			neutrals.push_back(_players[i]->name() + " #" + to_string(index));
+		}
+		else if (_players[i]->getRole() == Roles::SLAVE) {
+			slave = _players[i]->name() + " #" + to_string(index);
+		}
+		else if (_players[i]->getRole() == Roles::SUPER_SLAVE) {
+			superSlave = _players[i]->name() + " #" + to_string(index);
+		}
+	}
+
+	cout << endl << "Game over!" << endl;
+	cout << "KING: " << king << endl;
+	cout << "QUEEN: " << queen << endl;
+
+	for (int k = 0; k < neutrals.size(); k++) {
+		cout << "NEUTRALS: " << neutrals[k] << endl;
+	}
+
+	cout << "SLAVE: " << slave << endl;
+	cout << "SUPER SLAVE: " << superSlave << endl;
+}
+
+bool askToContinue() {
+	string reply = "";
+	cout << "Would you like to play another? (y/n) ";
+	cin >> reply;
+	
+	return reply.find("y") != string::npos;
+}
