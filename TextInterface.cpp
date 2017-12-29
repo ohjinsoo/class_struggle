@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include "Player.h"
 #include "Robot.h"
 #include "Human.h"
@@ -42,14 +43,6 @@ void playerWonAlready(string playerType, int index) {
 
 void playerGainedRole(string playerType, int index, Roles role) {
 
-}
-
-void displayNoPossibleCards() {
-
-}
-
-int passOrGo() {
-	return 0;
 }
 
 void gameOver(vector<Player*> _players) {
@@ -96,4 +89,39 @@ bool askToContinue() {
 	cin >> reply;
 	
 	return reply.find("y") != string::npos;
+}
+
+void displayAllCards(std::vector<Card> hand) {
+	cout << endl << "Your turn. You have: " << endl;
+	for (int i = 1; i < hand.size(); i++) {
+		cout << i << ". " << hand[i - 1].toString() << endl;
+	}
+	cout << hand.size() << ". " << hand.back().toString() << endl;
+	cout << hand.size() + 1 << ". Pass" << endl;
+}
+
+int askForCardChoice(int max) {
+	string choice = "";
+	int choiceNum = -1;
+	while (true) {
+
+		cout << "Which card would you like to choose? ";
+		cin >> choice;
+
+		std::stringstream choiceToInt(choice);
+		choiceToInt >> choiceNum;
+
+		if (choiceNum < 0 || choiceNum > max) {
+			cout << "Please choose a valid number." << endl;
+		}
+		else {
+			break;
+		}
+	}
+
+	return choiceNum;
+}
+
+void displayBadCard() {
+	cout << "This card is not valid." << endl;
 }

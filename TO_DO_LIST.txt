@@ -1,0 +1,4 @@
+- add double, triple, quadtriple card start option
+- add card swaps between roles
+- add leave option for players
+- add join options for players

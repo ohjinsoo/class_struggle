@@ -6,6 +6,8 @@
 #include "Player.h"
 #include "Card.h"
 
+
+// ----------GAMESTATE FUNCTIONS-------------------------
 void introToGame();
 
 void askHumanAmount();
@@ -16,11 +18,22 @@ void playerClearsHand(std::string playerType, int index);
 void playerGainedRole(std::string playerType, int index, Roles role);
 void passOutput(std::string playerType, int index);
 void playerWonTurnSet(std::string playerType, int index, Card lastCard);
-void displayNoPossibleCards();
 void playerWonAlready(std::string playerType, int index);
-int passOrGo();
 void gameOver(std::vector<Player*> _players);
 
 bool askToContinue();
+
+// ----------HUMAN FUNCTIONS-------------------------
+
+void displayAllCards(std::vector<Card> hand);
+int askForCardChoice(int max);
+void displayBadCard();
+
+
+
+
+
+
+
 
 #endif

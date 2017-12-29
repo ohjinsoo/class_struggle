@@ -141,15 +141,12 @@ void Gamestate::_turn(Card lastCard, Player * player, int index, int passes) {
 		_turn(lastCard, _players[index], index, passes);
 		return;
 	}
-	if (humanp != NULL) {
 
-	}
-	
-	
-	if (robotp != NULL && robotp->possibleMove(lastCard)) {
-		//If possible move, choose the next highest card.
-		card = robotp->pickCard(lastCard);
-		playerUsesCard("Robot", index, card);
+	if (humanp != NULL || ( robotp != NULL && robotp->possibleMove(lastCard)) ) {
+		card = player->pickCard(lastCard);
+		if (card != emptyCard) {
+			playerUsesCard(player->name(), index, card);
+		}
 	}
 
 	//After Player either passes or chooses card, check if hand is 0.
@@ -176,7 +173,7 @@ void Gamestate::_turn(Card lastCard, Player * player, int index, int passes) {
 
 	//Everyone but original player passed, so make card the weakest and reset passes for the next turn.
 	if (passes >= _humans + _robots - 1) {
-		playerWonTurnSet(player->name(), index, lastCard);
+		playerWonTurnSet(_players[index]->name(), index, lastCard);
 		lastCard = Card(3, 1, false);
 		passes = 0;
 	}
