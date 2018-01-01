@@ -6,15 +6,15 @@
 
 class Robot : public Player {
 	private:
-		void _removeBufferFromHand(Card card);
+		void _removeCardFromHand(Card card);
 
 	public:
 		Robot();
 		Robot(Roles role);
 		Robot(std::vector<Card> cards, Roles role);
-		Card pickCard(Card lastCard);
+		Card pickCard(Card lastCard, int cardStack);
 		std::string name();
-		bool possibleMove(Card lastCard);
+		int chooseCardStack();
 };
 
 

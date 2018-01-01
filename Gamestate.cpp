@@ -29,6 +29,8 @@ void Gamestate::init() {
 		return;
 	}
 
+	displayGameStart();
+
 	//If players size isn't the same as amount of humans and robots, means new game, initialize _players with Humans and Robots.
 	if (_players.size() != _humans + _robots) {
 		_initPlayers();
@@ -90,7 +92,7 @@ void Gamestate::_startGame() {
 
 		for (int k = 0; k < playerHand.size(); k++) {
 			if (playerHand[k].getValue() == 3 && playerHand[k].getSuit() == 1) {
-				_turn(Card(3, 0, false), _players[i], i, 0);
+				_turn(Card(0, 0, false), _players[i], i, 0, 1);
 				return;
 			}
 		}
@@ -113,7 +115,9 @@ void Gamestate::_startGame() {
 													11 -> Someone cleared hand. Give them role of their appropriate status.
 
 */
-void Gamestate::_turn(Card lastCard, Player * player, int index, int passes) {
+
+																		   //int cardStack = how many cards the turn set allows. 0 = new turn, player may choose.
+void Gamestate::_turn(Card lastCard, Player * player, int index, int passes, int cardStack) {
 	Robot * robotp = dynamic_cast<Robot*>(player);
 	Human * humanp = dynamic_cast<Human*>(player);
 	Card emptyCard;
@@ -125,11 +129,27 @@ void Gamestate::_turn(Card lastCard, Player * player, int index, int passes) {
 		_wins++;
 		Roles role = _findRoleForWinner();
 		player->setRole(role);
-
+		playerGainedRole(player->name(), index, role);
 		gameOver(_players);
 		if (askToContinue()) {
 			init();
 		}
+		return;
+	}
+
+	//Everyone but original player passed, so make card the weakest and reset passes for the next turn.
+	if (passes >= _humans + _robots - 1) {
+		//In case player wins turn set with his last card, increment index for next player:
+		if (player->getHand().size() == 0) {
+			playerWonAlready(player->name(), index);
+			index = _incrementOrGoBackToZero(index);
+		}
+		//Normal turn set win, keep the player in the same index with any card they want to use.
+		else {
+			playerWonTurnSet(player->name(), index, lastCard);
+		}
+		lastCard = Card(0, 0, false);
+		_turn(lastCard, _players[index], index, 0, 0);
 		return;
 	}
 
@@ -138,48 +158,44 @@ void Gamestate::_turn(Card lastCard, Player * player, int index, int passes) {
 		playerWonAlready(player->name(), index);
 		passes++;
 		index = _incrementOrGoBackToZero(index);
-		_turn(lastCard, _players[index], index, passes);
+		_turn(lastCard, _players[index], index, passes, cardStack);
 		return;
 	}
 
-	if (humanp != NULL || ( robotp != NULL && robotp->possibleMove(lastCard)) ) {
-		card = player->pickCard(lastCard);
+	if (humanp != NULL || robotp != NULL) {
+		//If cardStack is at 0, new turnset and you may choose the card stack amount.
+		//Else, make Player give the cardStack amount of cards to play.
+		
+		if (cardStack == 0) {
+			cardStack = player->chooseCardStack();
+		}
+
+		card = player->pickCard(lastCard, cardStack);
 		if (card != emptyCard) {
-			playerUsesCard(player->name(), index, card);
+			playerUsesCard(player->name(), index, card, cardStack);
+
+			//After Player chooses card, check if hand is 0.
+			//If hand is 0, give him a role and increase win.
+			if (player->getHand().size() == 0) {
+				playerClearsHand(player->name(), index);
+				_wins++;
+				Roles role = _findRoleForWinner();
+				player->setRole(role);
+				playerGainedRole(player->name(), index, role);
+			}
+
+			passes = 0;
+			index = _incrementOrGoBackToZero(index);
+			_turn(card, _players[index], index, passes, cardStack);
+			return;
 		}
 	}
 
-	//After Player either passes or chooses card, check if hand is 0.
-	//If hand is 0, give him a role and increase win.
-	if (player->getHand().size() == 0) {
-		_wins++;
-		Roles role = _findRoleForWinner();
-		player->setRole(role);
-	}
-
-	//If card isn't an empty card, Player chose a card to use. So use it and reset passes.
-	if (card != emptyCard) {
-		passes = 0;
-		index = _incrementOrGoBackToZero(index);
-		_turn(card, _players[index], index, passes);
-		return;
-	}
-
-	//If the card is empty, that means they passed.
-	//Either case, index will be incremented.
+	//If Player did not trigger any other if statements, means they pass.
 	passOutput(player->name(), index);
 	passes++;
 	index = _incrementOrGoBackToZero(index);
-
-	//Everyone but original player passed, so make card the weakest and reset passes for the next turn.
-	if (passes >= _humans + _robots - 1) {
-		playerWonTurnSet(_players[index]->name(), index, lastCard);
-		lastCard = Card(3, 1, false);
-		passes = 0;
-	}
-
-	//If its just normal passing, send it to next player.
-	_turn(lastCard, _players[index], index, passes);
+	_turn(lastCard, _players[index], index, passes, cardStack);
 }
 
 int Gamestate::_incrementOrGoBackToZero(int index) {

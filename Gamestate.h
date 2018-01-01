@@ -18,7 +18,7 @@ class Gamestate {
 		void _initPlayers();
 		std::vector<Card> _createHands(int & cardsInEachHand, int & remainders, Deck & cards);
 		void _startGame();
-		void _turn(Card lastCard, Player * player, int index, int passes);
+		void _turn(Card lastCard, Player * player, int index, int passes, int cardStack);
 		int _incrementOrGoBackToZero(int index);
 		Roles _findRoleForWinner();
 
