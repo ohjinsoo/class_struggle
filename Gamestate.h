@@ -21,6 +21,9 @@ class Gamestate {
 		void _turn(Card lastCard, Player * player, int index, int passes, int cardStack);
 		int _incrementOrGoBackToZero(int index);
 		Roles _findRoleForWinner();
+		void _initCardSwap();
+		Card _getBestCard(Player * player);
+		Card _getWorstCard(Player * player);
 
 	public: 
 		Gamestate();

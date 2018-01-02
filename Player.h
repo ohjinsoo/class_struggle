@@ -42,6 +42,7 @@ public:
 		updateAmountOfValue();
 	}
 
+
 	void printAll() {
 		for (int i = 0; i < _hand.size(); i++) {
 			std::cout << _hand[i].toString() << std::endl;
@@ -54,6 +55,19 @@ public:
 			int value = _hand[i].getValue();
 			_amountOfValue[value - 1]++;
 		}
+	}
+
+	void removeCardFromHand(Card card) {
+		for (int i = 0; i < _hand.size(); i++) {
+			if (card == _hand[i]) {
+				_hand.erase(_hand.begin() + i);
+				return;
+			}
+		}
+	}
+
+	void addCardToHand(Card card) {
+		_hand.push_back(card);
 	}
 	
 	virtual int chooseCardStack() = 0;

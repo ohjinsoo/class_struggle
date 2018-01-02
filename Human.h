@@ -6,9 +6,6 @@
 #include "Card.h"
 
 class Human : public Player {
-	private:
-		void _removeCardFromHand(Card card);
-
 	public:
 		Human();
 		Human(Roles role);

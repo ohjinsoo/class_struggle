@@ -33,22 +33,13 @@ Card Robot::pickCard(Card lastCard, int cardStack) {
 				buffer = card;
 			}
 		}
-		_removeCardFromHand(buffer);
+		removeCardFromHand(buffer);
 	}
 
 	if (index > -1) {
 		_amountOfValue[index] -= cardStack;
 	}
 		return buffer;
-}
-
-void Robot::_removeCardFromHand(Card card) {
-	for (int i = 0; i < _hand.size(); i++) {
-		if (card == _hand[i]) {
-			_hand.erase(_hand.begin() + i);
-			return;
-		}
-	}
 }
 
 //Robot always chooses the highest stack option.

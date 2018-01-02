@@ -5,8 +5,6 @@
 #include "Card.h"
 
 class Robot : public Player {
-	private:
-		void _removeCardFromHand(Card card);
 
 	public:
 		Robot();

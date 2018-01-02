@@ -57,6 +57,12 @@ void Gamestate::init() {
 	}
 
 	_wins = 0;
+
+
+	if (_players.size() >= MIN_FOR_ROLES) {
+		_initCardSwap();
+		displayCardSwapped();
+	}
 	_startGame();
 }
 
@@ -86,13 +92,118 @@ std::vector<Card> Gamestate::_createHands(int & cardsInEachHand, int & remainder
 	return hand;
 }
 
+/*
+	CARD SWAP RULES:
+		KING gives SUPER SLAVE their 2 worst cards.
+		QUEEN gives SLAVE their word card.
+
+		SLAVE gives QUEEN their best card.
+		SUPER SLAVE gives KING their 2 best cards.
+*/
+void Gamestate::_initCardSwap() {
+	Card kingFirstWorst;
+	Card kingSecWorst;
+	Card queenWorst;
+
+	Card superSlaveFirstBest;
+	Card superSlaveSecBest;
+	Card slaveBest;
+
+	//First get card to switch.
+	for (int i = 0; i < _players.size(); i++) {
+		Player * currentPlayer = _players[i];
+		Roles playerRole = currentPlayer->getRole();
+		switch (playerRole) {
+		case Roles::KING:
+			kingFirstWorst = _getWorstCard(currentPlayer);
+			currentPlayer->removeCardFromHand(kingFirstWorst);
+
+			kingSecWorst = _getWorstCard(currentPlayer);
+			currentPlayer->removeCardFromHand(kingSecWorst);
+			break;
+
+		case Roles::QUEEN:
+			queenWorst = _getWorstCard(currentPlayer);
+			currentPlayer->removeCardFromHand(queenWorst);
+			break;
+
+		case Roles::SLAVE:
+			slaveBest = _getBestCard(currentPlayer);
+			currentPlayer->removeCardFromHand(slaveBest);
+			break;
+
+
+		case Roles::SUPER_SLAVE:
+			superSlaveFirstBest = _getBestCard(currentPlayer);
+			currentPlayer->removeCardFromHand(superSlaveFirstBest);
+
+			superSlaveSecBest = _getBestCard(currentPlayer);
+			currentPlayer->removeCardFromHand(superSlaveSecBest);
+			break;
+		}
+	}
+
+	//Then add cards.
+	for (int i = 0; i < _players.size(); i++) {
+		Player * currentPlayer = _players[i];
+		Roles playerRole = currentPlayer->getRole();
+		switch (playerRole) {
+			case Roles::KING:
+				currentPlayer->addCardToHand(superSlaveFirstBest);
+				currentPlayer->addCardToHand(superSlaveSecBest);
+				break;
+
+			case Roles::QUEEN:
+				currentPlayer->addCardToHand(slaveBest);
+				break;
+
+			case Roles::SLAVE:
+				currentPlayer->addCardToHand(queenWorst);
+				break;
+
+
+			case Roles::SUPER_SLAVE:
+				currentPlayer->addCardToHand(kingFirstWorst);
+				currentPlayer->addCardToHand(kingSecWorst);
+				break;
+		}
+
+		currentPlayer->updateAmountOfValue();
+	}
+}
+
+Card Gamestate::_getBestCard(Player * player) {
+	int size = player->getHand().size();
+	Card buffer = player->getHand()[0];
+	for (int i = 1; i < size; i++) {
+		if (player->getHand()[i] >= buffer) {
+			buffer = player->getHand()[i];
+		}
+	}
+
+	return buffer;
+}
+
+Card Gamestate::_getWorstCard(Player * player) {
+	int size = player->getHand().size();
+	Card buffer = player->getHand()[0];
+
+	for (int i = 1; i < size; i++) {
+		if (player->getHand()[i] <= buffer) {
+			buffer = player->getHand()[i];
+		}
+	}
+
+	return buffer;
+}
+
 void Gamestate::_startGame() {
 	for (int i = 0; i < _players.size(); i++) {
 		std::vector<Card> playerHand = _players[i]->getHand();
 
 		for (int k = 0; k < playerHand.size(); k++) {
-			if (playerHand[k].getValue() == 3 && playerHand[k].getSuit() == 1) {
-				_turn(Card(0, 0, false), _players[i], i, 0, 1);
+			if (playerHand[k] == Card(3, 1, false)) {
+				_turn(Card(3, 0, false), _players[i], i, 0, 1);
 				return;
 			}
 		}
@@ -141,14 +252,11 @@ void Gamestate::_turn(Card lastCard, Player * player, int index, int passes, int
 	if (passes >= _humans + _robots - 1) {
 		//In case player wins turn set with his last card, increment index for next player:
 		if (player->getHand().size() == 0) {
-			playerWonAlready(player->name(), index);
 			index = _incrementOrGoBackToZero(index);
 		}
-		//Normal turn set win, keep the player in the same index with any card they want to use.
-		else {
-			playerWonTurnSet(player->name(), index, lastCard);
-		}
-		lastCard = Card(0, 0, false);
+
+		playerWonTurnSet(player->name(), index, lastCard);
+		lastCard = Card(3, 0, false);
 		_turn(lastCard, _players[index], index, 0, 0);
 		return;
 	}

@@ -21,15 +21,17 @@ std::string Human::name() {
 
 Card Human::pickCard(Card lastCard, int cardStack) {
 	displayAllCards(_hand);
+	displayPass(_hand.size() + 1);
 	displayLastCard(lastCard, cardStack);
 	int valueOfChosenCard = 0;
-
+	bool firstCard = true;
+	int choicesAmount = _hand.size() + 1;
 	while (true) {
-		int cardChoice = askForChoice(_hand.size() + 1) - 1;
+		int cardChoice = askForChoice(choicesAmount) - 1;
 
 		//If the choice is equal to hand size, that means they chose to pass.
-		//emptyCard = pass.
-		if (cardChoice == _hand.size()) {
+		//Only applies to if they havent chosen a card yet. If they did choose a card and now have to choose cards that stack, cannot pass.
+		if (cardChoice == _hand.size() && firstCard) {
 			Card emptyCard;
 			return emptyCard;
 		}
@@ -47,12 +49,21 @@ Card Human::pickCard(Card lastCard, int cardStack) {
 
 		if (humanCard >= lastCard && _amountOfValue[value - 1] >= cardStack && ( valueOfChosenCard == value || valueOfChosenCard == 0 )) {
 
-			_removeCardFromHand(humanCard);
+			removeCardFromHand(humanCard);
 
 			if (cardStack == 1) {
 				return humanCard;
 			}
 			else {
+				//-= 2 to eliminate passing.
+				//-- as you only need to eliminate passing once.
+				if (firstCard) {
+					choicesAmount -= 2;
+				}
+				else {
+					choicesAmount--;
+				}
+				firstCard = false;
 				displayAllCards(_hand);
 				valueOfChosenCard = value;
 				cardStack--;
@@ -61,15 +72,6 @@ Card Human::pickCard(Card lastCard, int cardStack) {
 		}
 		else {
 			displayBadCard();
-		}
-	}
-}
-
-void Human::_removeCardFromHand(Card card) {
-	for (int i = 0; i < _hand.size(); i++) {
-		if (card == _hand[i]) {
-			_hand.erase(_hand.begin() + i);
-			return;
 		}
 	}
 }

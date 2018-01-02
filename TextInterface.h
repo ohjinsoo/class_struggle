@@ -25,6 +25,7 @@ void gameOver(std::vector<Player*> _players);
 int getStackOptions(std::vector<Card> hand);
 void displayStackOptions(int options);
 void displayCardStack(int cardStack);
+void displayCardSwapped();
 
 bool askToContinue();
 
@@ -33,6 +34,7 @@ bool askToContinue();
 void displayLastCard(Card lastCard, int cardStack);
 void displayRequireCards(int cards);
 void displayAllCards(std::vector<Card> hand);
+void displayPass(int pass);
 int askForChoice(int max);
 void displayBadCard();
 

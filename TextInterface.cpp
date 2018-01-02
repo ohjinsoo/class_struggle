@@ -46,8 +46,9 @@ void playerWonAlready(string playerType, int index) {
 	cout << playerType << " #" << index + 1 << " has emptied their hand already." << endl;
 }
 
-
-
+void displayCardSwapped() {
+	cout << "Cards have been swapped to their new owners!" << endl << endl;
+}
 int getStackOptions(vector<Card> hand) {
 	//13 because that is the amount of values possible. All starting at 0 values.
 	vector<int> cardStackValues(13, 0);
@@ -155,7 +156,10 @@ void displayAllCards(std::vector<Card> hand) {
 		cout << i << ". " << hand[i - 1].toString() << endl;
 	}
 	cout << hand.size() << ". " << hand.back().toString() << endl;
-	cout << hand.size() + 1 << ". Pass" << endl << endl;
+}
+
+void displayPass(int pass) {
+	cout << pass << ". Pass" << endl << endl;
 }
 
 int askForChoice(int max) {
@@ -190,8 +194,7 @@ void displayRequireCards(int cards) {
 
 void displayLastCard(Card lastCard, int cardStack) {
 	cout << endl << "LAST CARD PLAYED: ";
-	Card emptyCard;
-	if (lastCard == emptyCard) {
+	if (lastCard == Card(3, 0, false)) {
 		cout << "NONE" << endl;
 	}
 	else {
